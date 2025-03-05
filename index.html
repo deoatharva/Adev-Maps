@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adev Maps</title>
+  
+  <!-- Include Leaflet.js CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  
+  <!-- Include Leaflet Routing Machine CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+  
+  <style>
+    /* Fullscreen map */
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* Travel form styles */
+    #travelForm {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: white;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      display: none; /* Hidden initially */
+      z-index: 1000; /* Ensures it's on top of the map */
+    }
+
+    #travelForm input {
+      margin: 5px 0;
+      padding: 8px;
+      width: 250px;
+      box-sizing: border-box;
+    }
+
+    #travelForm button {
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    /* Travel button style */
+    #travelBtn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      z-index: 1001;
+    }
+
+    #travelBtn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <!-- Map container -->
+  <div id="map"></div>
+
+  <!-- Travel Form -->
+  <div id="travelForm">
+    <h3>Enter Travel Details</h3>
+    <input type="text" id="source" placeholder="Enter source (lat, lng)" /><br />
+    <input type="text" id="destination" placeholder="Enter destination (lat, lng)" /><br />
+    <button id="submitRoute">Submit</button>
+  </div>
+
+  <!-- Travel Button -->
+  <button id="travelBtn">Travel</button>
+
+  <!-- Include Leaflet.js JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- Include Leaflet Routing Machine JS -->
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+  <script>
+    // Initialize the map with Mumbai coordinates (19.0760, 72.8777)
+    var map = L.map('map', {
+      center: [19.0760, 72.8777], 
+      zoom: 13
+    });
+
+    // Add a tile layer (using OpenStreetMap, similar to Google Maps)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Add a marker at Mumbai's coordinates (Optional: Just to show an initial marker)
+    var marker = L.marker([19.0760, 72.8777]).addTo(map);
+    marker.bindPopup("<b>Welcome to Mumbai!</b><br>This is the city of dreams.").openPopup();
+
+    // Travel Button: Show the form when clicked
+    var travelBtn = document.getElementById('travelBtn');
+    var travelForm = document.getElementById('travelForm');
+
+    travelBtn.onclick = function() {
+      travelForm.style.display = 'block'; // Show the form
+    };
+
+    // Handle form submission to show the route
+    var submitRouteButton = document.getElementById('submitRoute');
+    submitRouteButton.onclick = function() {
+      var sourceInput = document.getElementById('source').value;
+      var destinationInput = document.getElementById('destination').value;
+
+      // Parse the input as lat, lng
+      var sourceCoords = sourceInput.split(',').map(coord => parseFloat(coord.trim()));
+      var destinationCoords = destinationInput.split(',').map(coord => parseFloat(coord.trim()));
+
+      if (sourceCoords.length === 2 && destinationCoords.length === 2) {
+        // Create a routing control between the source and destination
+        L.Routing.control({
+          waypoints: [
+            L.latLng(sourceCoords[0], sourceCoords[1]),
+            L.latLng(destinationCoords[0], destinationCoords[1])
+          ],
+          routeWhileDragging: true, // Allow route to update when dragging the waypoints
+          createMarker: function() { return null; } // Disable markers on the route
+        }).addTo(map);
+
+        // Hide the form after submission
+        travelForm.style.display = 'none';
+      } else {
+        alert("Please enter valid coordinates in the format: lat, lng");
+      }
+    };
+  </script>
+</body>
+</html>
